@@ -193,7 +193,6 @@ class LeaveTypeForm(ConditionForm):
             del self.errors["employee_id"]
         if "exceed_days" in self.errors:
             del self.errors["exceed_days"]
-        cleaned_data["total_days"] = round(cleaned_data["total_days"] * 2) / 2
         if not cleaned_data["limit_leave"]:
             cleaned_data["total_days"] = LEAVE_MAX_LIMIT
             cleaned_data["reset"] = True
@@ -265,7 +264,6 @@ class UpdateLeaveTypeForm(ConditionForm):
         cleaned_data = super().clean()
         if "exceed_days" in self.errors:
             del self.errors["exceed_days"]
-        cleaned_data["count"] = round(cleaned_data["count"] * 2) / 2
         if not cleaned_data["limit_leave"]:
             cleaned_data["total_days"] = LEAVE_MAX_LIMIT
             cleaned_data["reset"] = True
