@@ -895,7 +895,7 @@ class RotatingWorkTypeAssignForm(ModelForm):
                 employee.employee_work_info.work_type_id
             )
             rotating_work_type_assign.next_work_type = rotating_work_type.work_type1
-            rotating_work_type_assign.additional_data["next_shift_index"] = 1
+            rotating_work_type_assign.additional_data["next_work_type_index"] = 1
             based_on = self.cleaned_data["based_on"]
             start_date = self.cleaned_data["start_date"]
             if based_on == "weekly":
@@ -2348,6 +2348,18 @@ class AnnouncementForm(ModelForm):
     Announcement Form
     """
 
+    employees = HorillaMultiSelectField(
+        queryset=Employee.objects.all(),
+        widget=HorillaMultiSelectWidget(
+            filter_route_name="employee-widget-filter",
+            filter_class=EmployeeFilter,
+            filter_instance_contex_name="f",
+            filter_template_path="employee_filters.html",
+            required=True,
+        ),
+        label="Employees",
+    )
+
     class Meta:
         """
         Meta class for additional options
@@ -2397,6 +2409,18 @@ class AnnouncementForm(ModelForm):
     def as_p(self, *args, **kwargs):
         context = {"form": self}
         return render_to_string("announcement/as_p.html", context)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if isinstance(self.fields["employees"], HorillaMultiSelectField):
+            self.errors.pop("employees", None)
+
+            employee_data = self.fields["employees"].queryset.filter(
+                id__in=self.data.getlist("employees")
+            )
+            cleaned_data["employees"] = employee_data
+
+        return cleaned_data
 
 
 class AnnouncementCommentForm(ModelForm):

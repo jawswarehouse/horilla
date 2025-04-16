@@ -246,6 +246,7 @@ def load_demo_database(request):
                     ("pms", "pms_data.json"),
                     ("payroll", "payroll_data.json"),
                     ("payroll", "payroll_loanaccount_data.json"),
+                    ("project", "project_data.json"),
                 ]
 
                 # Add data files for installed apps
@@ -256,7 +257,10 @@ def load_demo_database(request):
                 # Load all data files
                 for file in data_files:
                     file_path = path.join(settings.BASE_DIR, "load_data", file)
-                    call_command("loaddata", file_path)
+                    try:
+                        call_command("loaddata", file_path)
+                    except Exception as e:
+                        messages.error(request, f"An error occured : {e}")
 
                 messages.success(request, _("Database loaded successfully."))
             else:
@@ -5402,6 +5406,12 @@ def enable_profile_edit_feature(request):
             DefaultAccessibility.objects.create(
                 feature="profile_edit", filter={"feature": ["profile_edit"]}
             )
+        else:
+            if feature is not None:
+                feature.delete()
+                messages.info(
+                    request, _("Profile edit accessibility feature has been removed.")
+                )
 
         if enabled:
             if not any(item[0] == "profile_edit" for item in ACCESSBILITY_FEATURE):
